@@ -124,22 +124,22 @@ contract WCCToken is StdToken
     string public constant symbol = "WCC";
     uint public constant decimals = 18;
 
-    uint public constant TOTAL_SUPPLY = 1156789000 * (1 ether / 1 wei); //1B156M789K
+    uint public constant TOTAL_SUPPLY = 206000000 * (1 ether / 1 wei); //206M
     // this includes DEVELOPERS_BONUS
-    uint public constant DEVELOPERS_BONUS = 476787800 * (1 ether / 1 wei); //476M787K
+    uint public constant DEVELOPERS_BONUS = 20600000 * (1 ether / 1 wei); //20M600K
 	
 	// 100M1k2 tokens sold during presale
     uint public constant PRESALE_PRICE = 5000;  // per 1 Ether
     uint public constant PRESALE_MAX_ETH = 1800;
-    uint public constant PRESALE_TOKEN_SUPPLY_LIMIT = PRESALE_PRICE * PRESALE_MAX_ETH * (1 ether / 1 wei);
+    uint public constant PRESALE_TOKEN_SUPPLY_LIMIT = PRESALE_PRICE * PRESALE_MAX_ETH * (1 ether / 1 wei); //9M
 
 
-    uint public constant ICO_PRICE1 = 2500;     // per 1 Ether
-    uint public constant ICO_PRICE2 = 2500;     // per 1 Ether
-    uint public constant ICO_PRICE3 = 2500;     // per 1 Ether
+    uint public constant ICO_PRICE1 = 4000;     // per 1 Ether
+    uint public constant ICO_PRICE2 = 3000;     // per 1 Ether
+    uint public constant ICO_PRICE_FULL = 2500;     // per 1 Ether
 
     // 680M2k2 - this includes presale tokens
-    uint public constant TOTAL_SOLD_TOKEN_SUPPLY_LIMIT = 680001200* (1 ether / 1 wei);
+    uint public constant TOTAL_SOLD_TOKEN_SUPPLY_LIMIT = 72100000* (1 ether / 1 wei); //72M100K
 
     enum State{
        Init,
@@ -148,7 +148,9 @@ contract WCCToken is StdToken
        PresaleRunning,
        PresaleFinished,
 
-       ICORunning,
+       ICORunning1,
+       ICORunning2,
+       ICORunning3,
        ICOFinished
     }
 
@@ -205,13 +207,13 @@ contract WCCToken is StdToken
         balances[_teamTokenBonus] += teamBonus;
         supply+= teamBonus;
         
-        assert(PRESALE_TOKEN_SUPPLY_LIMIT==100001200 * (1 ether / 1 wei));
-        assert(TOTAL_SOLD_TOKEN_SUPPLY_LIMIT==680001200 * (1 ether / 1 wei));
+        assert(PRESALE_TOKEN_SUPPLY_LIMIT==9000000 * (1 ether / 1 wei));
+        assert(TOTAL_SOLD_TOKEN_SUPPLY_LIMIT==72100000 * (1 ether / 1 wei));
     }
 
     function buyTokens() public payable
     {
-        require(currentState==State.PresaleRunning || currentState==State.ICORunning);
+        require(currentState==State.PresaleRunning || currentState==State.ICORunning1 || currentState==State.ICORunning2 || currentState==State.ICORunning3);
 
         if(currentState==State.PresaleRunning){
             return buyTokensPresale();
@@ -258,19 +260,16 @@ contract WCCToken is StdToken
 
     function getPrice()constant returns(uint)
     {
-        if(currentState==State.ICORunning){
-             if(icoSoldTokens<(200000000 * (1 ether / 1 wei))){
-                  return ICO_PRICE1;
-             }
-             
-             if(icoSoldTokens<(300000000 * (1 ether / 1 wei))){
-                  return ICO_PRICE2;
-             }
-
-             return ICO_PRICE3;
-        }else{
-             return PRESALE_PRICE;
+        if(currentState==State.PresaleRunning){
+            return PRESALE_PRICE;
         }
+        if(currentState==State.ICORunning1){
+            return ICO_PRICE1;
+        }
+        if(currentState==State.ICORunning2){
+            return ICO_PRICE2;
+        }
+        return ICO_PRICE_FULL;
     }
 
     function setState(State _nextState) public onlyTokenManager
